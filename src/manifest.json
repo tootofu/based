@@ -1,0 +1,20 @@
+{
+
+  "manifest_version": 2,
+  "name": "Based",
+  "version": "0.1.0",
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.hispachan.org/*",
+        "https://www.hispachan.org/*/res/*.html",
+        "https://www.hispasexy.org/*",
+        "https://www.hispasexy.org/*/res/*.html"
+      ],
+      "css": ["css/main.css"],
+      "js": ["main.js"]
+    }
+  ]
+
+}
