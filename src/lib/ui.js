@@ -1,6 +1,5 @@
 'use strict';
 
-
 export default class UI {
 
   static createDownloadButton( fileName, fileURL, text ) {
@@ -17,15 +16,15 @@ export default class UI {
   }
 
   static renderOnGeneric( obj ) {
-    const button = UI.createDownloadButton( obj.id, obj.fileURL );
-    const render_place = obj.node.querySelector('.reflink');
-    render_place.appendChild( button );
+      const button = UI.createDownloadButton( obj.id, obj.fileUrl );
+      const render_place = obj.node.querySelector('.reflink');
+      render_place.appendChild( button );
   }
 
   static renderOnThread( thread ) {
     UI.renderOnGeneric( thread );
 
-    thread.replies.forEach( ( reply ) => {
+    thread.content.forEach( ( reply ) => {
       UI.renderOnGeneric( reply );
     })
   }
@@ -33,7 +32,7 @@ export default class UI {
   static renderOnBoard( board ) {
     if ( board ) {
       
-      board.threads.forEach( ( thread ) => {
+      board.content.forEach( ( thread ) => {
         UI.renderOnThread( thread );     
       })
     
