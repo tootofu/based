@@ -10,6 +10,20 @@ module.exports = {
     filename: '[name].js'
   },
 
+  resolve: {
+    extensions: ['.ts', '.js']
+  },
+
+  module: {
+    rules: [
+        {
+            test: /\.tsx?/,
+            use: 'ts-loader',
+            exclude: /node_modules/
+        }
+    ]
+  },
+
   plugins: [
     new CopyPlugin({
       patterns: [
