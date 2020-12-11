@@ -1,4 +1,6 @@
-import { FileData, ReplyBase, ThreadBase, BoardBase } from '../../lib/components'
+import FileData from '../../utils/FileData';
+
+import {  ReplyBase, ThreadBase, BoardBase } from '../../lib/components'
 
 class Reply extends ReplyBase {
   constructor(id: string, fileData: FileData, node: HTMLElement, renderPlace: HTMLElement) {

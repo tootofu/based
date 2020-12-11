@@ -5,13 +5,7 @@ of the components for each Chan thread, board and catalog.
 
 */
 
-export interface FileData {
-  url: string;
-  name: string;
-  extension: string;
-  format?: string;
-  base64?: string;
-}
+import FileData from '../utils/FileData';
 
 /**/
 

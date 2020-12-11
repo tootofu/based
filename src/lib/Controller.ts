@@ -1,9 +1,9 @@
 import Downloader from './Downloader';
+import FileData from '../utils/FileData'
+
 import { blobToBase64, base64ToBlob } from '../utils/helpers';
-import { FileData } from './components';
 import { Observer } from '../utils/observer';
 import { saveAs } from 'file-saver';
-
 
 export default class {
 

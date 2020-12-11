@@ -1,4 +1,5 @@
-import { FileData } from './components';
+import FileData from '../utils/FileData';
+
 import { ReplyBase, ThreadBase } from './components';
 import { SingleButton, ZIPButton } from './ui';
 

@@ -1,5 +1,6 @@
 import Controller from './Controller';
-import { FileData } from './components';
+import FileData from '../utils/FileData';
+
 import { Observer } from '../utils/observer';
 
 abstract class DownloadButtonBase implements Observer { 
