@@ -2,7 +2,11 @@
 
   "manifest_version": 2,
   "name": "Based",
-  "version": "0.1.0",
+  "version": "0.2.0",
+
+  "background": {
+    "scripts": ["background.js"]
+  },
   
   "content_scripts": [
     {
@@ -12,8 +16,8 @@
         "https://www.hispasexy.org/*",
         "https://www.hispasexy.org/*/res/*.html"
       ],
-      "css": ["css/main.css"],
-      "js": ["main.js"]
+      "css": ["./css/main.css"],
+      "js": ["content.js"]
     }
   ]
 

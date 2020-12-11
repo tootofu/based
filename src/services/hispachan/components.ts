@@ -1,8 +1,8 @@
-import { ReplyBase, ThreadBase, BoardBase } from '../../lib/models'
+import { FileData, ReplyBase, ThreadBase, BoardBase } from '../../lib/components'
 
 class Reply extends ReplyBase {
-  constructor(id: string, fileUrl: string, node: HTMLElement) {
-    super(id, fileUrl, node);
+  constructor(id: string, fileData: FileData, node: HTMLElement, renderPlace: HTMLElement) {
+    super(id, fileData, node, renderPlace);
   }
 
   public static fromNode(node: HTMLElement): Reply | null {
@@ -10,23 +10,33 @@ class Reply extends ReplyBase {
     const replyId: string = node.id.match(/\d+$/g)![0];
     // getting file URL
     const referenceElement: HTMLElement = node.querySelector('.filesize') as HTMLElement;
-
+    
     if (replyId && referenceElement) {
       const referenceParent: HTMLElement = referenceElement.parentElement as HTMLElement;
       const fileElement: HTMLAnchorElement  = referenceParent!.querySelector('a') as HTMLAnchorElement;
-
+      
       if (fileElement && fileElement.target) {
-         const replyFileUrl: string = fileElement.href;
-         return new Reply(replyId, replyFileUrl, node);
+        const replyFileUrl: string = fileElement.href;
+        
+        const replyFileData: FileData = {
+          url: replyFileUrl,
+          name: replyId,
+          extension: replyFileUrl.match(/[a-z0-9]*$/g)![0]
+        }
+
+        const renderPlace: HTMLElement = node.querySelector('.reflink') as HTMLElement;
+
+        return new Reply(replyId, replyFileData, node, renderPlace);
       }
     }
+
     return null;
   }
 }
 
 export class Thread extends ThreadBase {
-  constructor(id: string, board: string, fileUrl: string, content: Reply[], node: HTMLElement) {
-    super(id, board, fileUrl, content, node);
+  constructor(id: string, board: string, fileData: FileData, content: Reply[], node: HTMLElement, renderPlace: HTMLElement) {
+    super(id, board, fileData, content, node, renderPlace);
   }
 
   public static fromNode(node: HTMLElement): Thread | null {
@@ -43,6 +53,12 @@ export class Thread extends ThreadBase {
     const fileElement: HTMLAnchorElement = referenceElement!.firstElementChild as HTMLAnchorElement;
     const threadFileUrl: string = fileElement.href;
 
+    const threadFileData: FileData = {
+      url: threadFileUrl,
+      name: threadId,
+      extension: threadFileUrl.match(/[a-z0-9]*$/g)![0]
+    }
+
     // getting thread replies
     const replyNodes: HTMLElement[] = [...node.querySelectorAll('.reply')] as HTMLElement[];
     const threadReplies: Reply[] = [];
@@ -55,7 +71,9 @@ export class Thread extends ThreadBase {
       }
     })
 
-    return new Thread(threadId, boardName, threadFileUrl, threadReplies, node);
+    const renderPlace: HTMLElement = node.querySelector('.reflink') as HTMLElement;
+
+    return new Thread(threadId, boardName, threadFileData, threadReplies, node, renderPlace);
   }
 }
 

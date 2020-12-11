@@ -4,16 +4,17 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: './src/main.js',
+  entry: {
+    content: ['./src/content/hispachan.js'],
+    background: './src/background/index.js'
+  },
   output: {
     path: path.join( __dirname, 'dist' ),
     filename: '[name].js'
   },
-
   resolve: {
     extensions: ['.ts', '.js']
   },
-
   module: {
     rules: [
         {
@@ -23,7 +24,6 @@ module.exports = {
         }
     ]
   },
-
   plugins: [
     new CopyPlugin({
       patterns: [
