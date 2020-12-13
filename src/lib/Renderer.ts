@@ -4,8 +4,9 @@ import { ReplyBase, ThreadBase } from './components';
 import { SingleButton, ZIPButton } from './ui';
 
 export default class Renderer {
+  
   public static renderOnGeneric(generic: ReplyBase | ThreadBase): void {
-    const singleButton = new SingleButton('Download file', generic.fileData);
+    const singleButton = new SingleButton(generic.fileData);
     generic.renderPlace.appendChild(singleButton.element);
   }
 
@@ -22,7 +23,7 @@ export default class Renderer {
       threadFileData.push(reply.fileData);
     }
 
-    const zipButton = new ZIPButton('Download as ZIP', threadFileData);
+    const zipButton = new ZIPButton(threadFileData);
     thread.renderPlace.appendChild(zipButton.element);
   }
 }
