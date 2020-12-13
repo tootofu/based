@@ -5,7 +5,10 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
-    content: ['./src/content/hispachan.js'],
+    content: [
+      './src/content/4chan.js',
+      './src/content/hispachan.js'
+    ],
     background: './src/background/index.js'
   },
   output: {

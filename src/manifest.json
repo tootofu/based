@@ -1,8 +1,7 @@
 {
-
   "manifest_version": 2,
   "name": "Based",
-  "version": "0.2.0",
+  "version": "0.3.0",
 
   "background": {
     "scripts": ["background.js"]
@@ -11,14 +10,13 @@
   "content_scripts": [
     {
       "matches": [
+        "https://boards.4chan.org/*",
+        "https://boards.4channel.org/*",
         "https://www.hispachan.org/*",
-        "https://www.hispachan.org/*/res/*.html",
-        "https://www.hispasexy.org/*",
-        "https://www.hispasexy.org/*/res/*.html"
+        "https://www.hispasexy.org/*"
       ],
       "css": ["./css/main.css"],
       "js": ["content.js"]
     }
   ]
-
 }
