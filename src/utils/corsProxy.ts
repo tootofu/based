@@ -1,0 +1,1 @@
+export const corsProxy: string = 'https://cors-anywhere.herokuapp.com/';

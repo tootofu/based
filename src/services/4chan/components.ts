@@ -1,6 +1,7 @@
 import FileData from '../../utils/FileData';
 
-import {  ReplyBase, ThreadBase } from '../../lib/components'
+import { corsProxy } from '../../utils/corsProxy';
+import {  ReplyBase, ThreadBase } from '../../lib/components';
 
 class Reply extends ReplyBase {
   constructor(id: string, fileData: FileData, node: HTMLElement, renderPlace: HTMLElement) {
@@ -17,7 +18,7 @@ class Reply extends ReplyBase {
       const fileElement: HTMLAnchorElement  = referenceElement!.querySelector('.fileThumb') as HTMLAnchorElement;
       
       if (fileElement && fileElement.target) {
-        const replyFileUrl: string = fileElement.href;
+        const replyFileUrl: string = corsProxy + fileElement.href;
         
         const replyFileData: FileData = {
           url: replyFileUrl,
@@ -52,7 +53,7 @@ export class Thread extends ThreadBase {
     // getting thread file URL
     const referenceElement: HTMLElement = node.querySelector('.opContainer') as HTMLElement;
     const fileElement: HTMLAnchorElement = referenceElement!.querySelector('.fileThumb') as HTMLAnchorElement;
-    const threadFileUrl: string = fileElement.href;
+    const threadFileUrl: string = corsProxy + fileElement.href;
 
     const threadFileData: FileData = {
       url: threadFileUrl,
