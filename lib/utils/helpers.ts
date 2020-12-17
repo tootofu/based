@@ -9,7 +9,7 @@ export function blobToBase64(blob: Blob): Promise<string | ArrayBuffer | null> {
   })
 }
 
-export function base64ToBlob(data: string, type: string) {
+export function base64ToBlob(data: string, type: string): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const byteString = atob(data.split(',')[1]);
     const buffer = new ArrayBuffer(byteString.length);

@@ -1,7 +1,8 @@
 export default interface FileData {
   url: string;
-  name: string;
+  id: string;
   extension: string;
-  format?: string;
-  base64?: string;
+  fileName: string;
+  type?: string;
+  blob?: Blob;
 }

@@ -1,0 +1,45 @@
+.based-button {
+  border: none;
+  cursor: pointer;
+  margin: 2px 2px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: #eb176f;
+  color: #ffffff;
+}
+
+.based-button:hover {
+  background: #000000;
+}
+
+.based-button_progress {
+  border: none;
+  margin: 2px 2px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: #ffbb00;
+  color: #ffffff;
+}
+
+.based-button_success {
+  font-size: 15px;
+  border: none;
+  margin: 2px 2px;
+  border-radius: 50%;
+  background: #10a31c;
+  color: #ffffff;
+}
+
+.based-button_error {
+  border: none;
+  cursor: pointer;
+  margin: 2px 2px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: #ff5260;
+  color: #ffffff;
+}
+
+.based-button_error:hover {
+  background: #000000;
+}

@@ -31,7 +31,8 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: './src/manifest.json', to: './' },
-        { from: './src/css/main.css', to: 'css/' }
+        { from: './src/css/based.css', to: './css' },
+        { from: './src/css/tooltip.css', to: './css' }
       ]
     })
   ]

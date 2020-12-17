@@ -1,34 +1,46 @@
-import FileData from '../../utils/FileData';
+import FileData from '../../../lib/utils/FileData';
 
-import { corsProxy } from '../../utils/corsProxy';
-import {  ReplyBase, ThreadBase } from '../../lib/components';
+import {  ReplyBase, ThreadBase } from '../../../lib/components';
 
 class Reply extends ReplyBase {
-  constructor(id: string, fileData: FileData, node: HTMLElement, renderPlace: HTMLElement) {
-    super(id, fileData, node, renderPlace);
+
+  constructor(node: HTMLElement) {
+    super(node);
   }
 
-  public static fromNode(node: HTMLElement): Reply | null {
-    // getting reply id
-    const replyId: string = node.id.match(/\d+$/g)![0];
-    // getting file URL
-    const referenceElement: HTMLElement = node.querySelector('.file') as HTMLElement;
-    
-    if (replyId && referenceElement) {
-      const fileElement: HTMLAnchorElement  = referenceElement!.querySelector('.fileThumb') as HTMLAnchorElement;
+  protected setId(node: HTMLElement): string {
+    return node.id.match(/\d+$/g)![0];
+  }
+
+  protected setRenderPlace(node: HTMLElement): HTMLElement | null {
+    return node.querySelector('.fileText');
+  }
+  
+  protected setFileData(id: string, node: HTMLElement): FileData | null {
+    // Sometimes, when an answer has a link and does not have a file,
+    // the link is taken as the URL of the image, that is wrong!
+    // renderPlace setter checks if exist a file in the reply
+    // because the CSS class 'filesize' is only in replies with files.
+    // so, if renderPlace is null, there is not a file.
+    if (this.renderPlace != null) {
+      const reference: HTMLElement | null = node.querySelector('.fileText');
       
-      if (fileElement && fileElement.target) {
-        const replyFileUrl: string = corsProxy + fileElement.href;
-        
-        const replyFileData: FileData = {
-          url: replyFileUrl,
-          name: replyId,
-          extension: replyFileUrl.match(/[a-z0-9]*$/g)![0]
+      if (reference != null) {
+        const fileContainer: HTMLAnchorElement | null = reference.querySelector('a');
+  
+        if (fileContainer && fileContainer.target) {
+          const fileURL: string = fileContainer.href;
+          const fileExtension: string = fileURL.match(/[a-z0-9]*$/g)![0];
+
+          const fileData: FileData = {
+            url: fileURL,
+            id: id,
+            extension: fileExtension,
+            fileName: `${id}.${fileExtension}`
+          }
+  
+          return fileData;
         }
-
-        const renderPlace: HTMLElement = node.querySelector('.postInfo') as HTMLElement;
-
-        return new Reply(replyId, replyFileData, node, renderPlace);
       }
     }
 
@@ -37,44 +49,58 @@ class Reply extends ReplyBase {
 }
 
 export class Thread extends ThreadBase {
-  constructor(id: string, board: string, fileData: FileData, content: Reply[], node: HTMLElement, renderPlace: HTMLElement) {
-    super(id, board, fileData, content, node, renderPlace);
+
+  constructor(node: HTMLElement) {
+    super(node);
   }
 
-  public static fromNode(node: HTMLElement): Thread | null {
-    const nodeId: string = node.id;
+  protected setId(node: HTMLElement): string {
+    return node.id.match(/\d+/g)![0];
+  }
 
-    // getting thread id
-    const threadId: string = nodeId.match(/\d+/g)![0];
-    // getting board name
-    const boardName: string = ''; // this should be deprecated, totally usless!
-    // getting thread URL
-    const threadUrl: string = ''; // useless too...
-    // getting thread file URL
-    const referenceElement: HTMLElement = node.querySelector('.opContainer') as HTMLElement;
-    const fileElement: HTMLAnchorElement = referenceElement!.querySelector('.fileThumb') as HTMLAnchorElement;
-    const threadFileUrl: string = corsProxy + fileElement.href;
+  protected setRenderPlace(node: HTMLElement): HTMLElement | null {
+    return node.querySelector('.fileText');
+  }
 
-    const threadFileData: FileData = {
-      url: threadFileUrl,
-      name: threadId,
-      extension: threadFileUrl.match(/[a-z0-9]*$/g)![0]
+  protected setFileData(id: string, node: HTMLElement): FileData | null {
+    const reference: HTMLElement | null = node.querySelector('.fileText');
+    
+    if (reference != null) {
+      const urlContainer: Element | null = reference.firstElementChild;
+
+      if (urlContainer != null) {
+        const fileURL: string = (urlContainer as HTMLAnchorElement).href;
+        const fileExtension: string = fileURL.match(/[a-z0-9]*$/g)![0];
+        
+        const fileData: FileData = {
+          url: fileURL,
+          id: id,
+          extension: fileExtension,
+          fileName: `${id}.${fileExtension}`
+        }
+
+        return fileData;
+      }
     }
+  
+    return null;
+  }
 
-    // getting thread replies
-    const replyNodes: HTMLElement[] = [...node.querySelectorAll('.replyContainer')] as HTMLElement[];
+  protected setContent(node: HTMLElement): Reply[] {
+    const replyNodes: HTMLElement[] = [...node.querySelectorAll('.postContainer.replyContainer')] as HTMLElement[];
     const threadReplies: Reply[] = [];
 
-    replyNodes.forEach((replyNode: HTMLElement) => {
-      const reply: Reply | null = Reply.fromNode(replyNode) as Reply;
+    for (const replyNode of replyNodes) {
 
-      if (reply) {
-        threadReplies.push(reply);
+      if (replyNode) {
+        const reply: Reply = new Reply(replyNode)
+        // we only will take the ones that have files
+        if (reply.fileData) {
+          threadReplies.push(reply);
+        }
       }
-    })
-
-    const renderPlace: HTMLElement = node.querySelector('.postInfo') as HTMLElement;
-
-    return new Thread(threadId, boardName, threadFileData, threadReplies, node, renderPlace);
+    }
+  
+    return threadReplies;
   }
 }
