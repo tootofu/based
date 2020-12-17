@@ -1,4 +1,4 @@
-# Based
+![Based](based.png)
 
 Browser extension for ZIP and download files from threads of the following imageboards:
   * [4chan](https://www.4chan.org/)
