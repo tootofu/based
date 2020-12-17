@@ -8,8 +8,7 @@ module.exports = {
     content: [
       './src/content/4chan.js',
       './src/content/hispachan.js'
-    ],
-    background: './src/background/index.js'
+    ]
   },
   output: {
     path: path.join( __dirname, 'dist' ),
