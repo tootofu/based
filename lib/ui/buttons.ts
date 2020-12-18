@@ -1,7 +1,7 @@
 import Controller from '../Controller';
 import FileData from '../utils/FileData';
 
-import { Observer } from '../utils/observer';
+import { Observer, Notification } from '../utils/observer';
 
 abstract class DownloadButtonBase implements Observer { 
 
@@ -13,8 +13,8 @@ abstract class DownloadButtonBase implements Observer {
     this.controller = Controller.SingletonConstructor(this);
   }
 
-  public update(type: string , content: string): void {
-    switch (type) {
+  public update(n: Notification): void {
+    switch (n.type) {
 
       case 'success':
         this.element.textContent = '✓';
@@ -30,20 +30,15 @@ abstract class DownloadButtonBase implements Observer {
         }
 
         this.element.classList.replace('based-button', 'based-button_success');
-        this.element.setAttribute('tooltip', content);
+        this.element.setAttribute('tooltip', n.content);
         this.element.setAttribute('flow', 'down');
         break;
 
-      case 'downloading':
-        this.element.textContent = content;
-        break;
-      
+      case 'download':
       case 'progress':
-        this.element.textContent = content;
-        break;
-
       case 'zip':
-        this.element.textContent = content;
+      case 'save':
+        this.element.textContent = n.content;
         break;
 
       case 'error':
@@ -57,7 +52,7 @@ abstract class DownloadButtonBase implements Observer {
           this.element.classList.replace('based-button_progress', 'based-button_error');
         }
 
-        this.element.setAttribute('tooltip', content);
+        this.element.setAttribute('tooltip', n.content);
         this.element.setAttribute('flow', 'down');
         break;
 

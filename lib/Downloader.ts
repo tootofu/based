@@ -1,4 +1,4 @@
-import { Observable, Observer } from './utils/observer'
+import { Observable, Observer, Notification } from './utils/observer'
 
 export default class implements Observable {
 
@@ -12,15 +12,15 @@ export default class implements Observable {
 
   constructor() {}
 
-  attach(o: Observer): void {
+  public attach(o: Observer): void {
     this.observers.push(o);
   }
 
-  notify(otf: Observer, type: string , content: string): void {
+  public notify(otf: Observer, n: Notification): void {
     // otf === observer to find :v
     const observer: Observer | undefined = this.observers.find(o => o == otf);
     if (observer) {
-      observer.update(type, content);
+      observer.update(n);
     } else {
       throw new Error('Error at \'Downloader.notify()\' method');
     }
@@ -36,17 +36,16 @@ export default class implements Observable {
     const blob = await this.corsRequiered(url)
                          .then(result => result ? this.corsProxy + url : url)
                          .then(url => {
-                           this.notify(o, 'downloading', 'Downloading...');
+                           this.notify(o, {type: 'download', content: 'Downloading...'});
                            return url;
                          })
                          .then(fetch)
                          .then(res => res.blob())
                          .catch((error) => {
-                           this.notify(o,'error', error);
+                           this.notify(o, {type: 'error', content :error});
                          });
 
     if (blob) {
-      this.notify(o, 'success', 'Success!');
       return blob;
     }
   }
@@ -63,15 +62,15 @@ export default class implements Observable {
               .then(blob => {
                 blobArray.push(blob);
                 const message = `Downloading: ${blobArray.length}/${urlArray.length}`;
-                this.notify(o, 'progress', message);
+                this.notify(o, {type: 'progress', content: message});
               })
               .catch((error) => {
-                this.notify(o,'error', error);
+                this.notify(o, {type: 'error', content: error});
                 promiseError = error;
               });
 
       if (promiseError) {
-        this.notify(o,'error', promiseError);
+        this.notify(o, {type: 'error', content: promiseError});
         break;
       }
     }

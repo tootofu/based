@@ -1,14 +1,11 @@
-
-
 /*                                     */
-/*    \__(° w U)__?    <-- A pirate    */
+/*    \__(° w U)__?    <-- A pirate?   */
 /*                                     */
-
 
 const JSZIP = require('jszip');
 import FileData from './utils/FileData';
 
-import { Observer, Observable } from './utils/observer';
+import { Observer, Observable, Notification } from './utils/observer';
 
 export default class implements Observable {
 
@@ -16,15 +13,15 @@ export default class implements Observable {
 
   constructor() {};
 
-  attach(o: Observer): void {
+  public attach(o: Observer): void {
     this.observers.push(o);
   }
 
-  notify(otf: Observer, type: string , content: string): void {
-    // otf === observer to find
+  public notify(otf: Observer, n: Notification): void {
+    // otf === observer to find :v
     const observer: Observer | undefined = this.observers.find(o => o == otf);
     if (observer) {
-      observer.update(type, content);
+      observer.update(n);
     } else {
       throw new Error('Error at \'Zipper.notify()\' method');
     }
@@ -37,11 +34,9 @@ export default class implements Observable {
       zip.file(fileData.fileName, fileData.blob, {binary: true});
     }
     
-    this.notify(o, 'zip', 'Generating Zip file...');
+    this.notify(o, {type: 'zip', content: 'Generating Zip file...'});
 
     const zipped = await zip.generateAsync({type: 'blob'});
-
-    this.notify(o, 'success', 'Success!');
     return zipped;
   }
 }
