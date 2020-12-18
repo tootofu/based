@@ -6,11 +6,9 @@ import { Observer } from '../utils/observer';
 abstract class DownloadButtonBase implements Observer { 
 
   protected controller: Controller;
-  public id: string;
   public element: HTMLButtonElement = document.createElement('button');
   
-  constructor(id: string) {
-    this.id = id;
+  constructor() {
     this.element.classList.add('based-button');
     this.controller = Controller.SingletonConstructor(this);
   }
@@ -76,7 +74,7 @@ export class SingleButton extends DownloadButtonBase {
   public fileData: FileData;
   
   constructor(fileData: FileData) {
-    super(fileData.id);
+    super();
     this.fileData = fileData;
     this.element.textContent = 'Download file';
     this.element.addEventListener('click', this.onClick.bind(this));
@@ -104,7 +102,7 @@ export class ZIPButton extends DownloadButtonBase {
   public threadFileData: FileData[];
 
   constructor(threadFileData: FileData[]) {
-    super('0');
+    super();
     this.threadFileData = threadFileData;
     this.element.textContent = 'Download all as Zip';
     this.element.addEventListener('click', this.onClick.bind(this));

@@ -6,6 +6,5 @@ export interface Observable {
 }
 
 export interface Observer {
-  id: string;
   update(type: string , content: string): void;
 }

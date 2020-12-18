@@ -19,10 +19,7 @@ export default class Controller {
     }
 
     Controller.instance.downloader.attach(o);
-
-    if (o.id == '0') {
-      Controller.instance.zipper.attach(o);
-    }
+    Controller.instance.zipper.attach(o);
 
     return Controller.instance;
   }
