@@ -1,0 +1,13 @@
+.brand {
+  font-family: 'Roboto', sans-serif;
+  display: inline-block;
+  padding: 5px 10px;
+  cursor: default;
+  background-color: #eb176f;
+  color: #ffffff;
+}
+
+.links {
+  margin-left: 10px;
+  display: block;
+}
