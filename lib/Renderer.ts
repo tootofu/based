@@ -1,29 +1,24 @@
-import FileData from './utils/FileData';
+import { DownloadButton, ZipButton } from './ui/buttons';
+import { Post } from './components';
+import View from './View';
 
-import { ReplyBase, ThreadBase } from './components';
-import { SingleButton, ZIPButton } from './ui/buttons';
+export default class {
+  static render(post: Post): View {
+    const downloadButtons: DownloadButton[] = [];
 
-export default class Renderer {
-  
-  public static renderOnGeneric(generic: ReplyBase | ThreadBase): void {
-    const singleButton = new SingleButton(generic.fileData!);
-    generic.renderPlace!.appendChild(singleButton.element);
-  }
+    const downloadButton = new DownloadButton(post.id);
+    post.renderPlace?.appendChild(downloadButton.element);
+    downloadButtons.push(downloadButton);
 
-  public static renderOnThread(thread: ThreadBase): void {
-    Renderer.renderOnGeneric(thread);
+    const zipButton = new ZipButton('zip');
+    post.renderPlace?.appendChild(zipButton.element);
 
-    const threadFileData: FileData[] = [];
-    threadFileData.push(thread.fileData!);
+    post.content.forEach((reply) => {
+      const button = new DownloadButton(reply.id);
+      reply.renderPlace?.appendChild(button.element);
+      downloadButtons.push(button);
+    })
 
-    for (const reply of thread.content) {
-      // rendering on reply
-      Renderer.renderOnGeneric(reply);
-      // adding reply file data to 'threadFileData' array
-      threadFileData.push(reply.fileData!);
-    }
-
-    const zipButton = new ZIPButton(threadFileData);
-    thread.renderPlace!.appendChild(zipButton.element);
+    return new View(zipButton, downloadButtons);
   }
 }

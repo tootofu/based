@@ -1,44 +1,56 @@
-import Controller from '../Controller';
-import FileData from '../utils/FileData';
+abstract class Button {
 
-import { Observer, Notification } from '../utils/observer';
-
-abstract class DownloadButtonBase implements Observer { 
-
-  protected controller: Controller;
+  public id: string;
   public element: HTMLButtonElement = document.createElement('button');
-  
-  constructor() {
+
+  constructor(id: string, textContent: string) {
+    this.id = id;
+    this.element.id = `based-${id}`;
+    this.element.textContent = textContent;
     this.element.classList.add('based-button');
-    this.controller = Controller.SingletonConstructor(this);
   }
 
-  public update(n: Notification): void {
+  protected clickEventHandler(): void {
+    this.element.disabled = true;
+    this.element.textContent = 'Waiting...';
+      
+    if (this.element.classList.contains('based-button_error')) {
+      this.element.classList.replace('based-button_error', 'based-button_progress');
+      this.element.removeAttribute('tooltip');
+      this.element.removeAttribute('flow');
+    } else if (this.element.classList.contains('based-button')) {
+      this.element.classList.replace('based-button', 'based-button_progress');
+    }
+  }
+
+  public update(n: {type: string, payload: string}): void {
     switch (n.type) {
+      case 'download':
+      case 'zip':
+      case 'save':
+        this.element.textContent = n.payload;
+        break;
+
+      case 'progress':
+        this.element.textContent = `Downloading: ${n.payload}`;
+        break;
 
       case 'success':
         this.element.textContent = '✓';
 
         if (this.element.classList.contains('based-button')) {
           this.element.classList.replace('based-button', 'based-button_success');
-        
+
         } else if (this.element.classList.contains('based-button_progress')) {
           this.element.classList.replace('based-button_progress', 'based-button_success');
-        
+
         } else if (this.element.classList.contains('based-button_error')) {
           this.element.classList.replace('based-button_error', 'based-button_success');
         }
 
         this.element.classList.replace('based-button', 'based-button_success');
-        this.element.setAttribute('tooltip', n.content);
+        this.element.setAttribute('tooltip', n.payload);
         this.element.setAttribute('flow', 'down');
-        break;
-
-      case 'download':
-      case 'progress':
-      case 'zip':
-      case 'save':
-        this.element.textContent = n.content;
         break;
 
       case 'error':
@@ -52,7 +64,7 @@ abstract class DownloadButtonBase implements Observer {
           this.element.classList.replace('based-button_progress', 'based-button_error');
         }
 
-        this.element.setAttribute('tooltip', n.content);
+        this.element.setAttribute('tooltip', n.payload);
         this.element.setAttribute('flow', 'down');
         break;
 
@@ -60,62 +72,36 @@ abstract class DownloadButtonBase implements Observer {
         break;
     }
   }
-  
-  protected abstract onClick(e: Event): void;
 }
 
-export class SingleButton extends DownloadButtonBase {
+export class DownloadButton extends Button {
 
-  public fileData: FileData;
-  
-  constructor(fileData: FileData) {
-    super();
-    this.fileData = fileData;
-    this.element.textContent = 'Download file';
-    this.element.addEventListener('click', this.onClick.bind(this));
+  constructor(id: string) {
+    super(id, 'Download file');
   }
 
-  protected onClick(e: Event): void {
-    e.preventDefault();
-    this.element.disabled = true;
-    this.element.textContent = 'Waiting...';
-    
-    if (this.element.classList.contains('based-button_error')) {
-      this.element.classList.replace('based-button_error', 'based-button_progress');
-      this.element.removeAttribute('tooltip');
-      this.element.removeAttribute('flow');
-    } else if (this.element.classList.contains('based-button')) {
-      this.element.classList.replace('based-button', 'based-button_progress');
-    }
-    
-    this.controller.downloadAndSave(this, this.fileData);
+  public bindDownload(handler: Function): void {
+    this.element.addEventListener('click', (e: Event): void => {
+      e.preventDefault();
+      this.clickEventHandler();
+
+      handler(this.id);
+    })
   }
 }
 
-export class ZIPButton extends DownloadButtonBase {
+export class ZipButton extends Button {
 
-  public threadFileData: FileData[];
-
-  constructor(threadFileData: FileData[]) {
-    super();
-    this.threadFileData = threadFileData;
-    this.element.textContent = 'Download all as Zip';
-    this.element.addEventListener('click', this.onClick.bind(this));
+  constructor(id: string) {
+    super(id, 'Download all as Zip');
   }
 
-  protected onClick(e: Event): void {
-    e.preventDefault();
-    this.element.disabled = true;
-    this.element.textContent = 'Waiting...';
-
-    if (this.element.classList.contains('based-button_error')) {
-      this.element.classList.replace('based-button_error', 'based-button_progress');
-      this.element.removeAttribute('tooltip');
-      this.element.removeAttribute('flow');
-    } else if (this.element.classList.contains('based-button')) {
-      this.element.classList.replace('based-button', 'based-button_progress');
-    }
-
-    this.controller.downloadAndZIP(this, this.threadFileData);
+  public bindZip(handler: Function): void {
+    this.element.addEventListener('click', (e: Event): void => {
+      e.preventDefault();
+      this.clickEventHandler();
+    
+      handler(this.id);
+    })
   }
 }

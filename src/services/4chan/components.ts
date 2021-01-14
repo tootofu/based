@@ -1,22 +1,20 @@
-import FileData from '../../../lib/utils/FileData';
+import { Reply as AbsReply, Post as AbsPost } from '../../../lib/components';
 
-import {  ReplyBase, ThreadBase } from '../../../lib/components';
-
-class Reply extends ReplyBase {
+class Reply extends AbsReply {
 
   constructor(node: HTMLElement) {
     super(node);
   }
 
-  protected setId(node: HTMLElement): string {
+  protected getId(node: HTMLElement): string {
     return node.id.match(/\d+$/g)![0];
   }
 
-  protected setRenderPlace(node: HTMLElement): HTMLElement | null {
+  protected getRenderPlace(node: HTMLElement): HTMLElement | null {
     return node.querySelector('.fileText');
   }
   
-  protected setFileData(id: string, node: HTMLElement): FileData | null {
+  protected getFileUrl(id: string, node: HTMLElement): string | null {
     // Sometimes, when an answer has a link and does not have a file,
     // the link is taken as the URL of the image, that is wrong!
     // renderPlace setter checks if exist a file in the reply
@@ -29,64 +27,42 @@ class Reply extends ReplyBase {
         const fileContainer: HTMLAnchorElement | null = reference.querySelector('a');
   
         if (fileContainer && fileContainer.target) {
-          const fileURL: string = fileContainer.href;
-          const fileExtension: string = fileURL.match(/[a-z0-9]*$/g)![0];
-
-          const fileData: FileData = {
-            url: fileURL,
-            id: id,
-            extension: fileExtension,
-            fileName: `${id}.${fileExtension}`
-          }
-  
-          return fileData;
+          return fileContainer.href;
         }
       }
     }
-
     return null;
   }
 }
 
-export class Thread extends ThreadBase {
+export class Post extends AbsPost {
 
   constructor(node: HTMLElement) {
     super(node);
   }
 
-  protected setId(node: HTMLElement): string {
+  protected getId(node: HTMLElement): string {
     return node.id.match(/\d+/g)![0];
   }
 
-  protected setRenderPlace(node: HTMLElement): HTMLElement | null {
+  protected getRenderPlace(node: HTMLElement): HTMLElement | null {
     return node.querySelector('.fileText');
   }
 
-  protected setFileData(id: string, node: HTMLElement): FileData | null {
+  protected getFileUrl(id: string, node: HTMLElement): string | null {
     const reference: HTMLElement | null = node.querySelector('.fileText');
     
     if (reference != null) {
       const urlContainer: Element | null = reference.firstElementChild;
 
       if (urlContainer != null) {
-        const fileURL: string = (urlContainer as HTMLAnchorElement).href;
-        const fileExtension: string = fileURL.match(/[a-z0-9]*$/g)![0];
-        
-        const fileData: FileData = {
-          url: fileURL,
-          id: id,
-          extension: fileExtension,
-          fileName: `${id}.${fileExtension}`
-        }
-
-        return fileData;
+        return (urlContainer as HTMLAnchorElement).href;
       }
     }
-  
     return null;
   }
 
-  protected setContent(node: HTMLElement): Reply[] {
+  protected getContent(node: HTMLElement): Reply[] {
     const replyNodes: HTMLElement[] = [...node.querySelectorAll('.postContainer.replyContainer')] as HTMLElement[];
     const threadReplies: Reply[] = [];
 
@@ -95,12 +71,11 @@ export class Thread extends ThreadBase {
       if (replyNode) {
         const reply: Reply = new Reply(replyNode)
         // we only will take the ones that have files
-        if (reply.fileData) {
+        if (reply.fileUrl) {
           threadReplies.push(reply);
         }
       }
     }
-  
     return threadReplies;
   }
 }

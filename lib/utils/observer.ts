@@ -1,15 +1,14 @@
-// Interfaces for a simple observer pattern implementation
-
 export interface Notification {
   type: string;
-  content: string;
+  target?: any;
+  payload: string;
 }
 
 export interface Observable {
   attach(o: Observer): void;
-  notify(o: Observer, message: Notification): void;
+  notify(n: Notification): void;
 }
 
 export interface Observer {
-  update(message: Notification): void;
+  update(n: Notification): void;
 }
