@@ -29,7 +29,6 @@ export default class {
 
   public add(id: string): void {
     this.staying.push(id);
-    this.checkState();
   }
 
   public commit(): void {

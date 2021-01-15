@@ -42,7 +42,7 @@ export default class implements Observable {
     if (this.post.id == id) {
       return {
         id: this.post.id,
-        name: this.post.fileUrl!.match(/[0-9]+\.[a-z0-9]+$/g)![0],
+        name: this.post.fileUrl!.match(/[a-z0-9]+\.[a-z0-9]+$/g)![0],
         url: this.post.fileUrl!,
         alreadyDownloaded: (this.state.isStored(this.post.id))
       }
@@ -51,7 +51,7 @@ export default class implements Observable {
       if (reply)
         return {
           id: reply.id,
-          name: reply.fileUrl!.match(/[0-9]+\.[a-z0-9]+$/g)![0],
+          name: reply.fileUrl!.match(/[a-z0-9]+\.[a-z0-9]+$/g)![0],
           url: reply.fileUrl!,
           alreadyDownloaded: (this.state.isStored(reply.id))
         }
@@ -96,7 +96,7 @@ export default class implements Observable {
 
     if (fdArray.length > 0) {
       let error;
-      let counter = 1;
+      let counter = 0;
       this.notify({type: 'download', payload: 'Downloading...', target: id});
   
       for (let fileData of fdArray) {

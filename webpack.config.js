@@ -7,7 +7,8 @@ module.exports = {
   entry: {
     content: [
       './src/content/4chan.js',
-      './src/content/hispachan.js'
+      './src/content/hispachan.js',
+      './src/content/yuki.js'
     ]
   },
   output: {

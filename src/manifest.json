@@ -9,7 +9,8 @@
         "https://boards.4chan.org/*",
         "https://boards.4channel.org/*",
         "https://www.hispachan.org/*",
-        "https://www.hispasexy.org/*"
+        "https://www.hispasexy.org/*",
+        "https://yuki.la/*"
       ],
       "css": [
         "./css/based.css",
