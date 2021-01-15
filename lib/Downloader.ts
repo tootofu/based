@@ -5,7 +5,7 @@ export default class {
     /https:\/\/www.(hispachan|hispasexy).org/i,
   ]
 
-  private corsProxy: string = 'https://cors-anywhere.herokuapp.com/';
+  private corsProxy: string = 'https://api.codetabs.com/v1/proxy?quest=';
   
   constructor() {}
 
@@ -18,7 +18,16 @@ export default class {
     const blob = await this.corsRequiered(url)
                          .then(result => result ? this.corsProxy + url : url)
                          .then(fetch)
-                         .then(res => res.blob())
+                         .then(resp => {
+                           switch (resp.status) {
+                             case 429:
+                               throw new Error('429 (Too Many Requests)');
+                               break;
+                             default:
+                               return resp.blob();
+                               break;
+                           }
+                          })
                          .catch(err => {throw err});
 
     return blob;

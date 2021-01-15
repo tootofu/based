@@ -2,139 +2,146 @@ import Downloader from './Downloader';
 import { Observable, Observer, Notification } from './utils/observer';
 import { Post } from './components';
 import Saver from './Saver';
+import State from './State';
 import Zipper from './Zipper';
 
-type State = {
-  [key: string]: string[]
+interface FileData {
+  id: string;
+  name: string;
+  url: string;
+  alreadyDownloaded: boolean;
+  blob?: Blob;
 }
 
 export default class implements Observable {
 
-  private stateId: string;
-  private post: Post;
   private downloader = new Downloader();
   private saver = new Saver();
   private zipper = new Zipper();
-
+  
   private observer: Observer; // initialized when an Observer is attached
+  private post: Post;
+  private state: State;
 
   constructor(post: Post) {
-    this.stateId = post.id;
     this.post = post;
-
-    this.checkInitialState();
+    this.state = new State(post.id);
   }
 
   public attach(o: Observer): void {
     this.observer = o;
+    this.notify({type: 'state', payload: ((this.post.content.length + 1) - this.state.pull().length).toString()});
   }
 
   public notify(n: Notification): void {
     if (this.observer) this.observer.update(n);
-    else throw new Error('Model.notify error: there is not Observer to notify');
+    else throw new Error('Model.notify() error: there is not Observer to notify');
   }
 
-  private checkInitialState(): void {
-    if (!localStorage['based'] || !localStorage['based'][this.stateId]) {
-      const initialState: State = {};
-      initialState[this.stateId] = [];
-      
-      localStorage.setItem('based', JSON.stringify(initialState));
+  private getFileDataById(id: string): FileData {
+    if (this.post.id == id) {
+      return {
+        id: this.post.id,
+        name: this.post.fileUrl!.match(/[0-9]+\.[a-z0-9]+$/g)![0],
+        url: this.post.fileUrl!,
+        alreadyDownloaded: (this.state.isStored(this.post.id))
+      }
+    } else {
+      const reply = this.post.content.find(reply => reply.id == id);
+      if (reply)
+        return {
+          id: reply.id,
+          name: reply.fileUrl!.match(/[0-9]+\.[a-z0-9]+$/g)![0],
+          url: reply.fileUrl!,
+          alreadyDownloaded: (this.state.isStored(reply.id))
+        }
+      else
+        throw new Error('Model.getFileDataById() error: this should not happend, report it please!');
     }
   }
 
-  private getGlobalState(): State {
-    return JSON.parse(localStorage.getItem('based')!); 
-  }
+  private getFileDataArray(): FileData[] {
+    const fdArray: FileData[] = [];
+    fdArray.push(this.getFileDataById(this.post.id));
+    this.post.content.forEach(reply => fdArray.push(this.getFileDataById(reply.id)));
 
-  private getPostState(): string[] {
-    return JSON.parse(localStorage['based'][this.stateId]);
-  }
-
-  private setPostState(state: string[]): void {
-    const postState: string[] = this.getPostState();
-    const globalState: State = this.getGlobalState();
-
-    globalState[this.stateId] = postState.concat(state);
-  }
-
-  private getPostFileUrlById(id: string): string {
-    return this.post.id == id ? this.post.fileUrl as string : this.post.content.find((reply) => reply.id == id)?.fileUrl as string;
-  }
-
-  private getPostFilesUrl(): string[] {
-    const urls: string[] = [];
-
-    urls.push(this.post.fileUrl!);
-    this.post.content.forEach(reply => urls.push(reply.fileUrl!));
-
-    return urls
+    return fdArray;
   }
 
   public async downloadAndSave(id: string): Promise<void> {
-    const fileUrl = this.getPostFileUrlById(id);
-    const fileName = fileUrl.match(/[0-9]+\.[a-z0-9]+$/g)![0];
-    
+    const fileData = this.getFileDataById(id);
+        
     let error;
     this.notify({type: 'download', target: id, payload: 'Downloading...'});
 
-    await this.downloader.download(fileUrl)
+    await this.downloader.download(fileData.url)
             .then(blob => {
               this.notify({type: 'save', target: id, payload: 'Saving...'});
-              this.saver.saveFile(blob, fileName);
+              this.saver.saveFile(blob, fileData.name);
             })
             .catch(err => {
               error = err;
               this.notify({type: 'error', target: id, payload: err});
-              console.error(`Model.downloadAndSave() error: ${err}`);
             });
 
     if (!error) this.notify({type: 'success', target: id, payload: 'Success!'});
   }
 
-  public async downloadAndZip(id: string, all: boolean = false): Promise<void> {
-    let downloaded: {fileName: string, blob: Blob}[] = [];
-    let downloadedIds: string[] = [];
+  public async downloadAndZip(id: string, all: boolean=false): Promise<void> {
+    let fdArray: FileData[] = this.getFileDataArray();
 
-    let error;
-    this.notify({type: 'progress', target: id, payload: `${downloaded.length}/${this.getPostFilesUrl().length}`});
-
-    for (let fileUrl of this.getPostFilesUrl()) {
-      const fileId = fileUrl.match(/[0-9]+/g)![0];
-      const fileName = fileUrl.match(/[0-9]+\.[a-z0-9]+$/g)![0];
-
-      await this.downloader.download(fileUrl)
-              .then(blob => {
-                downloaded.push({fileName: fileName, blob: blob});
-                downloadedIds.push(fileId);
-                this.notify({type: 'progress', target: id, payload: `${downloaded.length}/${this.getPostFilesUrl().length}`});
-              })
-              .catch((err) => {
-                error = err;
-                this.notify({type: 'error', target: id, payload: err});
-                console.error(`Model.downloadAndZip() error: ${err}`);
-              });
-
-      if (error) {
-        break;
-      }
+    if (!all) {
+      fdArray = fdArray.filter(fileData => !fileData.alreadyDownloaded);
     }
 
-    if (!error) {
-      this.notify({type: 'zip', target: id, payload: 'Generating zip file...'});
-
-      await this.zipper.generateZipFile(downloaded)
-              .then(zipFile => {
-                this.notify({type: 'save', target: id, payload: 'Saving...'});
-                
-                this.saver.saveFile(zipFile, `${this.post.id}.zip`);
-                this.notify({type: 'success', target: id, payload: 'Success!'});
-              })
-              .catch((err) => {
-                error = err;
-                this.notify({type: 'error', target: id, payload: err});
-                console.error(`Model.downloadAndZip() error: ${err}`);
-              });
+    if (fdArray.length > 0) {
+      let error;
+      let counter = 1;
+      this.notify({type: 'download', payload: 'Downloading...', target: id});
+  
+      for (let fileData of fdArray) {
+        await this.downloader.download(fileData.url)
+                .then(blob => {
+                  counter++;
+                  fileData.blob = blob;
+                  this.state.add(fileData.id);
+                  this.notify({type: 'progress', payload: `${counter}/${fdArray.length}`, target: id});
+                })
+                .catch((err) => {
+                  error = err;
+                  this.notify({type: 'error', payload: err, target: id});
+                });
+  
+        if (error) {
+          this.state.rollback();
+          break;
+        }
+      }
+  
+      if (!error) {
+        this.notify({type: 'zip', payload: 'Generating zip file...', target: id});
+  
+        const files: {fileName: string, blob: Blob}[] = fdArray.map(fileData => {
+            return {fileName: fileData.name, blob: (fileData.blob as Blob)};
+        })
+  
+        await this.zipper.generateZipFile(files)
+                .then(zipFile => {
+                  this.notify({type: 'save', target: id, payload: 'Saving...'});
+                  this.saver.saveFile(zipFile, `${this.post.id}.zip`);
+                })
+                .then(() => {
+                  this.state.commit();
+                  this.notify({type: 'state', payload: ((this.post.content.length + 1) - this.state.pull().length).toString()});
+                })
+                .catch((err) => {
+                  error = err;
+                  this.state.rollback();
+                  this.notify({type: 'error', target: id, payload: err});
+                });
+      }
+    } else {
+      this.notify({type: 'state', payload: ((this.post.content.length + 1) - this.state.pull().length).toString()});
     }
   }
 }

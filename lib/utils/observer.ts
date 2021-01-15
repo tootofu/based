@@ -1,7 +1,7 @@
 export interface Notification {
   type: string;
-  target?: any;
   payload: string;
+  target?: any;
 }
 
 export interface Observable {

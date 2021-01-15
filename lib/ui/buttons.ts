@@ -1,12 +1,15 @@
 abstract class Button {
 
   public id: string;
+  protected defaultText: string;
   public element: HTMLButtonElement = document.createElement('button');
 
-  constructor(id: string, textContent: string) {
+  constructor(id: string, defaultText: string) {
     this.id = id;
+    this.defaultText = defaultText
+
     this.element.id = `based-${id}`;
-    this.element.textContent = textContent;
+    this.element.textContent = this.defaultText;
     this.element.classList.add('based-button');
   }
 
@@ -93,7 +96,7 @@ export class DownloadButton extends Button {
 export class ZipButton extends Button {
 
   constructor(id: string) {
-    super(id, 'Download all as Zip');
+    super(id, 'Download as Zip');
   }
 
   public bindZip(handler: Function): void {
@@ -103,5 +106,21 @@ export class ZipButton extends Button {
     
       handler(this.id);
     })
+  }
+
+  public update(n: {type: string, payload: string}): void {
+    super.update(n);
+
+    switch (n.type) {
+      case 'state':
+        this.element.removeAttribute('class');
+        this.element.classList.add('based-button');
+        this.element.textContent = `${this.defaultText} (${n.payload} files)`;
+        this.element.disabled = false;
+        break;
+    
+      default:
+        break;
+    }
   }
 }

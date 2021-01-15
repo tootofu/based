@@ -18,7 +18,7 @@ export default class implements Observer {
       if (n.target == this.zipButton.id) this.zipButton.update(notification);
       else this.downloadButtons.forEach((button) => {if (button.id == n.target) button.update(notification)});
     } else {
-      this.downloadButtons.forEach((button) => button.update(notification));
+      this.zipButton.update(notification);
     }
   }
 

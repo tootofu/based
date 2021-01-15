@@ -12,7 +12,7 @@ export default class {
     }
 
     const zipped = await zip.generateAsync({type: 'blob'})
-                         .catch((err: Error) => {throw err})
+                         .catch((err: Error) => {throw err});
     
     return zipped;
   }
